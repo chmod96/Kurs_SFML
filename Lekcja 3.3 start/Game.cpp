@@ -1,9 +1,15 @@
 #include "Game.h"
 
-RenderWindow window(VideoMode(1280,720),"Mechanized Techno Explorer",Style::Fullscreen);
+RenderWindow window;
 
 Game::Game(void)
 {
+	ContextSettings settings;
+	settings.antialiasingLevel = 8;
+	
+	window.create(VideoMode(1280,720),"Mechanized Techno Explorer",Style::Fullscreen,
+		settings);
+	
 	state = END;
 	window.setFramerateLimit(100);
 
@@ -72,7 +78,7 @@ void Game::menu()
 				event.key.code == Keyboard::Escape)
 				state = END;
 			
-			//klikniêcie MENU                                         //NOWE!!!
+			//klikniêcie MENU                              
 			else if(tekst[0].getGlobalBounds().contains(mouse) &&
 				event.type == Event::MouseButtonReleased && event.key.code == Mouse::Left)
 			{
