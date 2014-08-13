@@ -1,9 +1,20 @@
+/*
+Engine.cpp
+
+Poradnik: Piszemy grê w SFML'u
+Nazwa: Mechanized Techno Explorer
+
+Autor: Szymon Siarkiewicz (sheadovas)
+http://szymonsiarkiewicz.pl/
+
+*/
+
 #include "Engine.h"
 using namespace sf;
 
 Engine::Engine(sf::RenderWindow &win)
 {
-	window = &win;
+	runEngine(win);
 }
 
 
@@ -11,56 +22,36 @@ Engine::~Engine(void)
 {
 }
 
-void Engine::runEngine()
+void Engine::runEngine(sf::RenderWindow &window)
 {
 	bool menu = false;
-
-	sf::Clock zegar;
 	
 	while(!menu)
 	{
 		Event event;
-		while(window->pollEvent(event))
+		sf::Vector2f mysz(Mouse::getPosition(window));
+
+		while(window.pollEvent(event))
 		{
 			if(event.type == Event::KeyReleased && event.key.code == Keyboard::Escape)
 				menu = true;
 			
 			if(event.type == Event::KeyPressed && event.key.code == Keyboard::W)
 			{
-				player.goUp();
-			}
-			
-			if(event.type == Event::KeyPressed && event.key.code == Keyboard::S)
-			{
-				player.goDown();
-			}
-
-			if(event.type == Event::KeyPressed && event.key.code == Keyboard::A)
-			{
-				player.goLeft();
-			}
-
-			if(event.type == Event::KeyPressed && event.key.code == Keyboard::D)
-			{
-				player.goRight();
+				player.idz();
 			}
 			
 			else if(event.type == Event::KeyReleased)
 			{
-				if(event.key.code == Keyboard::W || event.key.code == Keyboard::S ||
-					event.key.code == Keyboard::A || event.key.code == Keyboard::D)
+				if(event.key.code == Keyboard::W)
 					player.stop();
 			}
 		}
 		
-		if(zegar.getElapsedTime() > sf::seconds(0.1))
-		{
-			player.update();
-			zegar.restart();
-		}
+		player.update(mysz);
 		
-		window->clear();
-		window->draw(player);
-		window->display();
+		window.clear();
+		window.draw(player);
+		window.display();
 	}
 }

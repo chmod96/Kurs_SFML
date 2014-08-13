@@ -1,29 +1,43 @@
+/*
+Player.cpp
+
+Poradnik: Piszemy grê w SFML'u
+Nazwa: Mechanized Techno Explorer
+
+Autor: Szymon Siarkiewicz (sheadovas)
+http://szymonsiarkiewicz.pl/
+
+*/
+
 #include "Player.h"
 #include <Windows.h>
+#include <math.h>
+#include <iostream>
+
+#define M_PI 3.14159265358979323846
 
 using namespace sf;
 
 Player::Player(void)
 {
-	if(!texture.loadFromFile("data/images/mechwarrior.png"))
+	if(!texture.loadFromFile("data/images/player-move.png"))
 	{
 		MessageBox(NULL,"Textures not found!","ERROR",NULL);
 		return;
 	}
 
 	sprite.setTexture(texture);
-	sprite.setTextureRect(IntRect(0,0,80,80));
+	sprite.setTextureRect(IntRect(0,0,64,64));
+
+	sprite.setOrigin(32,32);
 	
-	status = GO_DWN;
-	int size[Status_Count] = {10,16,9,15,10,15,9,16};
-	for(int i=0;i<Status_Count;i++)
-		frame_count.push_back(size[i]);
+	status = STOJ;
 
 	frame = 0;
 	speed = 1.5;
-	
-	animation = false;
 
+	sprite.setPosition(1280/2,720/2);
+	anim_clock.restart();
 }
 
 
@@ -40,69 +54,44 @@ void Player::draw(sf::RenderTarget &target, sf::RenderStates states) const
 }
 
 
-void Player::update()
+void Player::update(sf::Vector2f mysz)
 {
-	if(animation)
+	Vector2f norm = mysz - sprite.getPosition();
+	float rot = atan2(norm.y,norm.x);
+	rot = rot * 180.f/M_PI;
+	
+	rot += 90;
+	sprite.setRotation(rot);
+
+	if(anim_clock.getElapsedTime() > sf::seconds(0.09f) )
 	{
-		if(frame < frame_count[status])
+		if(status == STOJ) return;
+		if(frame < 7 /*liczba klatek animacji*/)
 			frame++;
 		else
-			frame = 0;
+			frame = 0; //zapetlanie animacji
 		
-		sprite.setTextureRect(IntRect(status*87,frame*80,87,80));
+		sprite.setTextureRect(IntRect(frame*64,0,64,64));
+								//x, y, szerokosc, wysokosc
+		anim_clock.restart();
 	}
-}
-
-
-void Player::playAnimation(bool play)
-{
-	animation = play;
-
-	if(animation == false)
-	{
-		frame = 0;
-		sprite.setTextureRect(IntRect(status*87,frame*80,87,80));
-	}
-}
-
-
-void Player::goDown()
-{
-	status = GO_DWN;
-	sprite.move(0,speed);
-
-	playAnimation(true);
-}
-
-
-void Player::goUp()
-{
-	status = GO_UP;
-	sprite.move(0,-speed);
-
-	playAnimation(true);
-}
-
-
-void Player::goLeft()
-{
-	status = GO_LEFT;
-	sprite.move(-speed,0);
-
-	playAnimation(true);
-}
-
-
-void Player::goRight()
-{
-	status = GO_RIGHT;
-	sprite.move(speed,0);
-
-	playAnimation(true);
 }
 
 
 void Player::stop()
 {
-	playAnimation(false);
+	status = STOJ;
+	frame = 0;
+}
+
+
+void Player::idz()
+{
+	status = IDZ;
+
+	float rotacja = sprite.getRotation();
+	float vx = sin(( rotacja * M_PI ) / 180.0f );
+	float vy = -cos(( rotacja * M_PI ) / 180.0f );
+
+	sprite.move (speed*vx,speed*vy);
 }
