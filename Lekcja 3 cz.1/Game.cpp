@@ -1,6 +1,17 @@
+/*
+Game.cpp
+
+Poradnik: Piszemy grê w SFML'u
+Nazwa: Mechanized Techno Explorer
+
+Autor: Szymon Siarkiewicz (sheadovas)
+http://szymonsiarkiewicz.pl/
+
+*/
+
 #include "Game.h"
 
-RenderWindow window(VideoMode(1280,720),"Mechanized Techno Explorer",Style::Fullscreen);
+RenderWindow window(VideoMode(1280,720),"Mechanized Techno Explorer",sf::Style::Close);
 
 Game::Game(void)
 {
@@ -61,7 +72,7 @@ void Game::menu()
 
 	while(state == MENU)
 	{
-		Vector2f mouse(Mouse::getPosition());
+		Vector2f mouse(Mouse::getPosition(window));
 		Event event;
 
 		while(window.pollEvent(event))
@@ -71,7 +82,7 @@ void Game::menu()
 				event.key.code == Keyboard::Escape)
 				state = END;
 			
-			//klikniêcie MENU                                         //NOWE!!!
+			//klikniêcie MENU                                        
 			else if(tekst[0].getGlobalBounds().contains(mouse) &&
 				event.type == Event::MouseButtonReleased && event.key.code == Mouse::Left)
 			{
@@ -103,8 +114,6 @@ void Game::menu()
 void Game::single()
 {
 	Engine engine(window);
-
-	engine.runEngine();
 
 	state = MENU;
 }

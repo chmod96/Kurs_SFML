@@ -1,4 +1,14 @@
-//Engine.h
+/*
+Engine.h
+
+Poradnik: Piszemy grê w SFML'u
+Nazwa: Mechanized Techno Explorer
+
+Autor: Szymon Siarkiewicz (sheadovas)
+http://szymonsiarkiewicz.pl/
+
+*/
+
 #pragma once
 
 #include "Player.h"
@@ -10,15 +20,12 @@ public:
 	Engine(sf::RenderWindow &win);
 	~Engine(void);
 
-	void runEngine();
+	void runEngine(sf::RenderWindow &window);
 
 private:
-	sf::RenderWindow *window;
-	
 	Player player;
-	Level level;
+	Level level; //poziom gry
 
-	sf::Texture t_tile[Level::COUNT];
-	sf::Sprite map[Level::height][Level::width];
+	sf::Texture tekstura[Level::COUNT]; //tekstury kafli
+	sf::Sprite sprite[Level::height][Level::width]; //poziom widziany przez gracza
 };
-

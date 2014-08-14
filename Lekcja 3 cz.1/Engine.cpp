@@ -1,33 +1,40 @@
-//Engine.cpp
-#include "Engine.h"
-#include <Windows.h>
+/*
+Engine.cpp
 
+Poradnik: Piszemy grê w SFML'u
+Nazwa: Mechanized Techno Explorer
+
+Autor: Szymon Siarkiewicz (sheadovas)
+http://szymonsiarkiewicz.pl/
+
+*/
+
+#include "Engine.h"
+#include <iostream>
 using namespace sf;
 
 Engine::Engine(sf::RenderWindow &win)
 {
-	window = &win;
-
-	if(!level.loadFromFile("map.level"))
-		return;
-
-	for(int i=0;i<Level::COUNT;i++)
+	//wczytanie tekstur
+	for(int i=1;i<Level::COUNT;i++)
 	{
-		if(!t_tile[i].loadFromFile("data/images/tiles.png",IntRect(i*40,0,40,40)))
-		{
-			MessageBox(NULL,"tiles.png","Textures not found!",NULL);
-			return;
-		}
+		tekstura[i].loadFromFile("data/images/tiles.png",IntRect((i-1)*level.tile_width,0,level.tile_width,level.tile_height));
 	}
 
-	for(int i=0;i<level.getHeight();i++)
+	//ustawienie kafli
+	level.loadFromFile("map.level");
+	for(int i=0;i<level.height;i++)
 	{
-		for(int j=0;j<level.getWidth();j++)
+		for(int j=0;j<level.width;j++)
 		{
-			map[i][j].setTexture(t_tile[level.m_data[i][j].type]);
-			map[i][j].setPosition(j*40,i*40);
+			if(level.poziom[i][j].type != Level::NONE)
+			{
+				sprite[i][j].setTexture(tekstura[level.poziom[i][j].type]);
+				sprite[i][j].setPosition(j*level.tile_width,i*level.tile_height);
+			}
 		}
 	}
+	runEngine(win);
 }
 
 
@@ -35,64 +42,43 @@ Engine::~Engine(void)
 {
 }
 
-
-void Engine::runEngine()
+void Engine::runEngine(sf::RenderWindow &window)
 {
 	bool menu = false;
-
-	sf::Clock zegar;
 	
 	while(!menu)
 	{
 		Event event;
-		while(window->pollEvent(event))
+		sf::Vector2f mysz(Mouse::getPosition(window));
+
+		while(window.pollEvent(event))
 		{
 			if(event.type == Event::KeyReleased && event.key.code == Keyboard::Escape)
 				menu = true;
 			
 			if(event.type == Event::KeyPressed && event.key.code == Keyboard::W)
 			{
-				player.goUp();
-			}
-			
-			if(event.type == Event::KeyPressed && event.key.code == Keyboard::S)
-			{
-				player.goDown();
-			}
-
-			if(event.type == Event::KeyPressed && event.key.code == Keyboard::A)
-			{
-				player.goLeft();
-			}
-
-			if(event.type == Event::KeyPressed && event.key.code == Keyboard::D)
-			{
-				player.goRight();
+				player.idz();
 			}
 			
 			else if(event.type == Event::KeyReleased)
 			{
-				if(event.key.code == Keyboard::W || event.key.code == Keyboard::S)
-					player.stopVertical();
-				if(event.key.code == Keyboard::A || event.key.code == Keyboard::D)
-					player.stopHorizontal();
+				if(event.key.code == Keyboard::W)
+					player.stop();
 			}
 		}
 		
-		if(zegar.getElapsedTime() > sf::seconds(0.1))
-		{
-			player.update();
-			zegar.restart();
-		}
+		player.update(mysz);
 		
-		window->clear();
-		
-		for(int i=0;i<level.getHeight();i++)
-			for(int j=0;j<level.getWidth();j++)
-				window->draw(map[i][j]);
+		window.clear();
 
-		window->draw(player);
-		
-		window->display();
+		//rysowanie poziomu
+		for(int i=0;i<level.height;i++)
+			for(int j=0;j<level.width;j++)
+				if(level.poziom[i][j].type != Level::NONE)
+					window.draw(sprite[i][j]);
+
+		window.draw(player);
+		window.display();
 	}
 }

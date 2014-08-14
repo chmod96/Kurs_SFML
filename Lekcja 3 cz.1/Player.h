@@ -1,4 +1,14 @@
-//Player.h
+/*
+Player.h
+
+Poradnik: Piszemy grê w SFML'u
+Nazwa: Mechanized Techno Explorer
+
+Autor: Szymon Siarkiewicz (sheadovas)
+http://szymonsiarkiewicz.pl/
+
+*/
+
 #pragma once
 
 #include <SFML\Graphics.hpp>
@@ -12,41 +22,31 @@ public:
 	~Player(void);
 
 	enum Status {
-	GO_DWN,GO_LEFT_DWN,GO_LEFT,GO_UP_LEFT,
-	GO_UP,GO_UP_RIGHT,GO_RIGHT,GO_DOWN_RIGHT,
-	Status_Count};
+	IDZ,
+	STOJ
+	};
 
-	sf::Vector2f getPos();
+	sf::Vector2f getPosition();
 	Status getStatus();
 
-	void update();
-	void playAnimation(bool play);
+	void update(sf::Vector2f mysz);
 
-	void goDown();
-	void goUp();
-
-	void goLeft();
-	void goRight();
-
-	void stopVertical();
-	void stopHorizontal();
+	void stop();
+	void idz();
 
 protected:
-	int frame;
-	std::vector<int> frame_count;
+	int klatka_animacji;
 
 private:
 	sf::Sprite sprite;
 	sf::Texture texture;
 
 	Status status;
-	bool animation;
 
 	float speed;
+	size_t frame;
 
-	//prêdkoœæ poruszania siê gracza
-	float vx; //w poziomie
-	float vy; //w pionie
+	sf::Clock anim_clock;
 	
 	virtual void draw(sf::RenderTarget &target,sf::RenderStates states) const;
 };
