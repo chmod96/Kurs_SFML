@@ -1,52 +1,48 @@
-//Player.cpp
+/*
+Player.cpp
+
+Poradnik: Piszemy grê w SFML'u
+Nazwa: Mechanized Techno Explorer
+
+Autor: Szymon Siarkiewicz (sheadovas)
+http://szymonsiarkiewicz.pl/
+
+*/
+
 #include "Player.h"
 #include <Windows.h>
+#include <math.h>
+#include <iostream>
+
+#define M_PI 3.14159265358979323846
 
 using namespace sf;
 
 Player::Player(void)
 {
-	if(!texture.loadFromFile("data/images/mechwarrior.png"))
+	if(!texture.loadFromFile("data/images/player-move.png"))
 	{
 		MessageBox(NULL,"Textures not found!","ERROR",NULL);
 		return;
 	}
 
 	sprite.setTexture(texture);
-	sprite.setTextureRect(IntRect(0,0,80,80));
+	sprite.setTextureRect(IntRect(0,0,64,64));
+
+	sprite.setOrigin(32,32);
 	
-	status = GO_DWN;
-	int size[Status_Count] = {10,16,9,15,10,15,9,16};
-	for(int i=0;i<Status_Count;i++)
-		frame_count.push_back(size[i]);
+	status = STOJ;
 
 	frame = 0;
-	speed = 7;
+	speed = 2.5f;
 
-	vx = 0;
-	vy = 0;
-	
-	animation = false;
-
-	width = sprite.getGlobalBounds().width;
-	height = sprite.getGlobalBounds().height;
+	sprite.setPosition(400,400);
+	anim_clock.restart();
 }
 
 
 Player::~Player(void)
 {
-}
-
-
-sf::Vector2f Player::getPos()
-{
-	return sprite.getPosition();
-}
-
-
-Player::Status Player::getStatus()
-{
-	return status;
 }
 
 
@@ -58,113 +54,71 @@ void Player::draw(sf::RenderTarget &target, sf::RenderStates states) const
 }
 
 
-void Player::update()
+void Player::update(sf::Vector2f mysz)
 {
-	//sprawdzamy czy postaæ siê porusza
-	if(vx == 0 && vy == 0)
-		playAnimation(false);
-	else
-	{
-		//postaæ idzie w dó³
-		if(vx == 0 && vy > 0)
-			status = GO_DWN;
-		//postaæ idzie w góre
-		else if(vx ==0 && vy < 0)
-			status = GO_UP;
-		//postac idzie w prawo
-		else if(vx > 0 && vy == 0)
-			status = GO_RIGHT;
-		//postac idzie w lewo
-		else if(vx < 0 && vy == 0)
-			status = GO_LEFT;
-		//lewo-dó³
-		else if(vx < 0 && vy > 0)
-			status = GO_LEFT_DWN;
-		//lewo-góra
-		else if(vx < 0 && vy < 0)
-			status = GO_UP_LEFT;
-		//prawo-dó³
-		else if(vx > 0 && vy > 0)
-			status = GO_DOWN_RIGHT;
-		//prawo-góra
-		else if(vx > 0 && vy < 0)
-			status = GO_UP_RIGHT;
+	Vector2f norm = mysz - sprite.getPosition();
+	float rot = atan2(norm.y,norm.x);
+	rot = rot * 180.f/M_PI;
+	
+	rot += 90;
+	sprite.setRotation(rot);
 
-		playAnimation(true);
-	}
-
-	if(animation)
+	if(anim_clock.getElapsedTime() > sf::seconds(0.09f) )
 	{
-		if(frame < frame_count[status])
+		if(status == STOJ) return;
+		if(frame < 7 /*liczba klatek animacji*/)
 			frame++;
 		else
-			frame = 0;
+			frame = 0; //zapetlanie animacji
 		
-		sprite.setTextureRect(IntRect(status*87,frame*80,87,80));
-	}
-
-	sprite.move(vx,vy);
-}
-
-
-void Player::playAnimation(bool play)
-{
-	animation = play;
-
-	if(animation == false)
-	{
-		frame = 0;
-		sprite.setTextureRect(IntRect(status*87,frame*80,87,80));
+		sprite.setTextureRect(IntRect(frame*64,0,64,64));
+								//x, y, szerokosc, wysokosc
+		
+		//poruszenie graczem
+		sprite.move(getSpeed());
+		
+		anim_clock.restart();
 	}
 }
 
 
-void Player::goDown()
+sf::Vector2f Player::getPosition()
 {
-	vy = speed;
+	return sprite.getPosition();
 }
 
 
-void Player::goUp()
+Player::Status Player::getStatus()
 {
-	vy = -speed;
+	return status;
 }
 
 
-void Player::goLeft()
+sf::FloatRect Player::getBoundingBox()
 {
-	vx = -speed;
+	sf::FloatRect f(sprite.getGlobalBounds());
+	return f;
 }
 
 
-void Player::goRight()
+sf::Vector2f Player::getSpeed()
 {
-	vx = speed;
+	float rotacja = sprite.getRotation();
+	float vx = sin(( rotacja * M_PI ) / 180.0f );
+	float vy = -cos(( rotacja * M_PI ) / 180.0f );
+	
+	return Vector2f(vx*speed,vy*speed);
 }
 
 
-void Player::stopHorizontal()
+void Player::stop()
 {
-	vx = 0;
+	status = STOJ;
 	frame = 0;
 }
 
 
-void Player::stopVertical()
+void Player::idz()
 {
-	vy = 0;
-	frame = 0;
-}
-
-
-void Player::setVelocity(int x,int y)
-{
-	vx = x;
-	vy = y;
-}
-
-
-sf::Vector2f Player::getNextPosition()
-{
-	return Vector2f(getPos().x+vx,getPos().y+vy);
+	status = IDZ;
 }
