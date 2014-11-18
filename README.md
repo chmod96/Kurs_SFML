@@ -3,6 +3,6 @@ Kurs_SFML
 
 Piszemy grę w SFML'u by Szymon Siarkiewicz (sheadovas)
 
-Jeżeli chcesz możesz wykorzystać z podanego tutaj kodu, lecz nie możesz się podawać za jaego autora
+Kod jest pod licencją CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/3.0/
 
 http://szymonsiarkiewicz.pl/
